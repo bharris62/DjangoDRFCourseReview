@@ -1,7 +1,9 @@
 # Create your views here.
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-
+from rest_framework import viewsets
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 from . import models
 from . import serializers
 
@@ -38,3 +40,18 @@ class RetrieveUpdateDestroyReview(generics.RetrieveUpdateDestroyAPIView):
             course_id=self.kwargs.get('course_pk'),
             pk=self.kwargs.get('pk')
         )
+
+class CourseViewSet(viewsets.ModelViewSet):
+    queryset = models.Course.objects.all()
+    serializer_class = serializers.CourseSerializer
+
+    @detail_route(methods=['get'])
+    def reviews(self, request, pk=None):
+        course = self.get_object()
+        serializer = serializers.ReviewSerializer(
+            course.reviews.all(), many=True)
+        return Response(serializer.data)
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = models.Review.objects.all()
+    serializer_class = serializers.ReviewSerializer
